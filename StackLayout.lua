@@ -79,25 +79,25 @@ end
 function StackLayout:getSortedByValue(tbl, sortFunction)
     local keys = {}
     for key in pairs(tbl) do
-      table.insert(keys, key)
+        table.insert(keys, key)
     end
-  
+
     table.sort(keys, function(a, b)
-      return sortFunction(tbl[a], tbl[b])
+        return sortFunction(tbl[a], tbl[b])
     end)
-  
+
     local res = {}
     for i, key in ipairs(keys) do
         table.insert(res, tbl[key])
     end
     return res
-  end
+end
 
 function StackLayout:layout()
     local sized = {}
     local byPrio = self:getSortedByValue(self.windows, function(a, b)
         return a:getLayoutPriority() > b:getLayoutPriority()
-    end) 
+    end)
 
     local available = self.horizontal and self:getWidth() or self:getHeight()
     for i, window in ipairs(byPrio) do
@@ -110,8 +110,7 @@ function StackLayout:layout()
             end
             local required = math.min(available, needed)
             sized[window:getLayoutId()] = required
-            print(string.format("pass1: window: %s, avail: %d, size: %d, prio: %d", window:getLayoutId(), available,
-                required, window:getLayoutPriority()))
+            -- print(string.format("pass1: window: %s, avail: %d, size: %d, prio: %d", window:getLayoutId(), available, required, window:getLayoutPriority()))
             available = available - required
         end
     end
@@ -128,8 +127,7 @@ function StackLayout:layout()
 
             local additional = math.min(available, diff)
             sized[window:getLayoutId()] = needed + additional
-            print(string.format("pass2: window: %s, avail: %d, size: %d, prio: %d", window:getLayoutId(), available,
-                needed + additional, window:getLayoutPriority()))
+            --print(string.format("pass2: window: %s, avail: %d, size: %d, prio: %d", window:getLayoutId(), available, needed + additional, window:getLayoutPriority()))
             available = available - additional
             if available <= 0 then
                 break
@@ -151,7 +149,7 @@ function StackLayout:layout()
                 window:reposition(1, offset, self:getWidth(), size)
             end
             window:redraw()
-            print(string.format("align: window: %s, size: %d, offset: %d", window:getLayoutId(), size, offset))
+            --print(string.format("align: window: %s, size: %d, offset: %d", window:getLayoutId(), size, offset))
             offset = offset + size
         end
     end
