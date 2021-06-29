@@ -1,5 +1,6 @@
 Window = {
     body = nil,
+    parent = nil,
     header = nil,
     gBody = nil,
     gHeader = nil,
@@ -7,22 +8,29 @@ Window = {
     minWidth = 0,
     minHeight = 0,
     priority = 0,
-    prefWidth= 0,
-    prefHeight= 0,
+    prefWidth = 0,
+    prefHeight = 0,
     visible = true,
     layoutId = "",
     layoutIndex = 0
 }
 
 function Window:new(parent, x, y, width, height, title)
-    if height < 3 then
-        return nil
+    local header = nil
+    local gHeader = nil
+
+    if title ~= nil then
+        if height < 3 then
+            return nil
+        end
+
+        header = window.create(parent, x, y, width, 2);
+        y = y + 2
+        height = height - 2
+        gHeader = Graphics.Graphics:new(header)
     end
 
-    local header = window.create(parent, x, y, width, 2);
-    local body = window.create(parent, x, y + 2, width, height - 2)
-
-    local gHeader = Graphics.Graphics:new(header)
+    local body = window.create(parent, x, y, width, height)
     local gBody = Graphics.Graphics:new(body)
 
     local self = {
@@ -30,7 +38,8 @@ function Window:new(parent, x, y, width, height, title)
         header = header,
         gBody = gBody,
         gHeader = gHeader,
-        title = title or ""
+        title = title or "",
+        parent = parent
     }
     setmetatable(self, {
         __index = Window
@@ -39,9 +48,36 @@ function Window:new(parent, x, y, width, height, title)
     return self
 end
 
-function Window:inside(x,y,header)
+function Window:setTitle(title)
+    self.title = title
+
+    if self:hasTitle() == false and title ~= nil then
+        if self:getHeight() < 3 then
+            return
+        end
+        local x, y = self:getPosition()
+        self.header = window.create(self.parent, x, y, self:getWidth(), 2)
+        self.gHeader = Graphics.Graphics:new(self.header)
+        self.body.reposition(x, y + 2, self:getWidth(), self:getHeight() - 2)
+    end
+
+    if self:hasTitle() and title == nil then
+        local x, y = self:getPosition()
+        self.body.reposition(x, y, self:getWidth(), self:getHeight() + 2)
+        self.header = nil
+        self.gHeader = nil
+    end
+
+    self:redraw()
+end
+
+function Window:hasTitle()
+    return self.header ~= nil
+end
+
+function Window:inside(x, y, header)
     local window = header and self.header or self.body
-    local posX,posY = window.getPosition()
+    local posX, posY = window.getPosition()
     return x >= posX and x <= self:getWidth() and y >= posY and y <= self:getHeight()
 end
 
@@ -85,6 +121,19 @@ function Window:setPrefSize(width, height)
     self.prefWidth = width
 end
 
+function Window:getWidth()
+    local w, _ = self.body.getSize()
+    return w
+end
+
+function Window:getHeight()
+    local _, h = self.body.getSize()
+    if self:hasTitle() then
+        h = h + 2
+    end
+    return h
+end
+
 function Window:getPrefWidth()
     return self.prefWidth
 end
@@ -105,23 +154,29 @@ function Window:getLayoutPriority()
     return self.priority
 end
 
-
 function Window:redraw()
-    local g = self.gHeader;
-    g:fillBox(1, 1, g:getWidth(), 1, "0");
-    g:write(1, 1, self.title, "f", "0")
-    g:write(1, 2, string.rep("-", g:getWidth()))
-    self.header.redraw()
+    if self:hasTitle() then
+        local g = self.gHeader;
+        g:fillBox(1, 1, g:getWidth(), 1, "0");
+        g:write(1, 1, self.title, "f", "0")
+        g:write(1, 2, string.rep("-", g:getWidth()))
+        self.header.redraw()
+    end
     self.body.redraw()
 end
 
 function Window:reposition(x, y, width, height)
-    if height < 3 then
-        return false
+    if self:hasTitle() then
+        if height < 3 then
+            return false
+        end
+
+        self.header.reposition(x, y, width, 2)
+        y = y + 2
+        height = height - 2
     end
 
-    self.header.reposition(x, y, width, 2)
-    self.body.reposition(x, y + 2, width, height - 2)
+    self.body.reposition(x, y, width, height)
     self.gBody:updateSize()
     self.gHeader:updateSize()
     self:redraw()
@@ -129,7 +184,11 @@ function Window:reposition(x, y, width, height)
 end
 
 function Window:getPosition()
-    return self.header.getPosition()
+    if self:hasTitle() then
+        return self.header.getPosition()
+    else
+        return self.body.getPosition()
+    end
 end
 
 function Window:getGraphics()

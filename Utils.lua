@@ -1,6 +1,6 @@
-function countIf(table, predicate) 
+function countIf(table, predicate)
     local res = 0
-    for i,val in pairs(table) do
+    for i, val in pairs(table) do
         if predicate == nil or predicate(val) then
             res = res + 1
         end
@@ -23,4 +23,16 @@ function getSortedByValue(tbl, sortFunction)
         table.insert(res, tbl[key])
     end
     return res
+end
+
+function max(tbl, func)
+    local highest = nil
+    for _, value in pairs(tbl) do
+        local val = func and func(value) or value
+        if highest == nil or highest < val then
+            highest = val
+        end
+    end
+
+    return highest
 end
