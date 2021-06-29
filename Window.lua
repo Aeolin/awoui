@@ -39,6 +39,12 @@ function Window:new(parent, x, y, width, height, title)
     return self
 end
 
+function Window:inside(x,y,header)
+    local window = header and self.header or self.body
+    local posX,posY = window.getPosition()
+    return x >= posX and x <= self:getWidth() and y >= posY and y <= self:getHeight()
+end
+
 function Window:setLayoutId(id)
     self.layoutId = id
 end
