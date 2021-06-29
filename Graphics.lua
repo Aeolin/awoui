@@ -99,7 +99,8 @@ function Graphics:round(x)
     return x >= 0 and math.floor(x + 0.5) or math.ceil(x - 0.5)
 end
 
-function Graphics:drawBarHorizontal(x, y, width, height, val, max, color, background, border, borderColor, flipped, percentageColor)
+function Graphics:drawBarHorizontal(x, y, width, height, val, max, color, background, border, borderColor, flipped,
+    percentageColor)
     if border == nil or height < 3 or width < 3 then
         border = false
     end
@@ -111,7 +112,7 @@ function Graphics:drawBarHorizontal(x, y, width, height, val, max, color, backgr
         width = width - 2
         height = height - 2
     end
- 
+
     local widthAdjusted = Graphics:round((val / max) * width)
     self:fillBox(x, y, width, height, background);
     if flipped then
@@ -128,17 +129,17 @@ function Graphics:drawBarHorizontal(x, y, width, height, val, max, color, backgr
         end
 
         local yOffset = Graphics:round(height / 2)
-        local offset = width - widthAdjusted > percentage:len() and widthAdjusted or width - percentage:len()
+        local offset = math.min(widthAdjusted, width - percentage:len())
         local bg = background
-        local overLap = (width - offset) - widthAdjusted
+        local overLap = widthAdjusted - offset
         if overLap > 0 then
             bg = string.rep(color, overLap) .. string.rep(background, percentage:len() - overLap)
         end
 
         if flipped then
-            self:write(width-offset-percentage:len(),yOffset,percentage,percentageColor,string.reverse(bg))
+            self:write(x + width - offset - percentage:len(), yOffset, percentage, percentageColor, string.reverse(bg))
         else
-            self:write(offset,yOffset,percentage,percentageColor,bg)
+            self:write(x + offset, yOffset, percentage, percentageColor, bg)
         end
 
     end
