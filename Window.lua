@@ -78,7 +78,7 @@ end
 function Window:inside(x, y, header)
     local window = header and self.header or self.body
     local posX, posY = window.getPosition()
-    return x >= posX and x <= self:getWidth() and y >= posY and y <= self:getHeight()
+    return x >= posX and x <= posX + self:getWidth() and y >= posY and y <= posY + self:getHeight()
 end
 
 function Window:setLayoutId(id)
