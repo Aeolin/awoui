@@ -128,7 +128,7 @@ function Graphics:drawBarHorizontal(x, y, width, height, val, max, color, backgr
             return
         end
 
-        local yOffset = Graphics:round(height / 2) + y
+        local yOffset = Graphics:round(height / 2) - 1 + y
         local offset = math.min(widthAdjusted, width - percentage:len())
         local bg = background
         local overLap = widthAdjusted - offset
